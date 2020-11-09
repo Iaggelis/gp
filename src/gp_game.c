@@ -306,26 +306,28 @@ void execute_action(Game *game, size_t agent_index, Action action)
 
 void step_game(Game *game)
 {
-    for (size_t i = 0; i < AGENTS_COUNT; ++i) {
-        if (game->agents[i].health > 0) {
-            // Interpret genes
-            for (size_t j = 0; j < JEANS_COUNT; ++j) {
-                Gene gene = game->agents[i].chromo.jeans[j];
-                if (gene.state == game->agents[i].state && gene.env == env_of_agent(game, i)) {
-                    execute_action(game, i, gene.action);
-                    game->agents[i].state = gene.next_state;
-                    break;
-                }
-            }
+    #pragma omp parallel num_threads(10)
+    {
+         for (size_t i = 0; i < AGENTS_COUNT; ++i) {
+                 if (game->agents[i].health > 0) {
+                         // Interpret genes
+                         for (size_t j = 0; j < JEANS_COUNT; ++j) {
+                                 Gene gene = game->agents[i].chromo.jeans[j];
+                                 if (gene.state == game->agents[i].state && gene.env == env_of_agent(game, i)) {
+                                         execute_action(game, i, gene.action);
+                                         game->agents[i].state = gene.next_state;
+                                         break;
+                                 }
+                         }
+                         // Apply hunger
+                         game->agents[i].hunger -= STEP_HUNGER_DAMAGE;
+                         if (game->agents[i].hunger <= 0) {
+                                 game->agents[i].health = 0;
+                         }
 
-            // Apply hunger
-            game->agents[i].hunger -= STEP_HUNGER_DAMAGE;
-            if (game->agents[i].hunger <= 0) {
-                game->agents[i].health = 0;
-            }
-
-            game->agents[i].lifetime += 1;
-        }
+                         game->agents[i].lifetime += 1;
+                 }
+         }
     }
 }
 

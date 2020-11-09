@@ -6,7 +6,7 @@ COMMON_SRC=src/gp_game.h src/gp_game.c src/gp_visual.h src/gp_visual.c
 all: gp_trainer gp_simulator gp_inspector
 
 gp_trainer: src/gp_trainer.c $(COMMON_SRC)
-	$(CC) $(CFLAGS) -o gp_trainer src/gp_trainer.c $(LIBS)
+	$(CC) $(CFLAGS) -fopenmp -o gp_trainer src/gp_trainer.c $(LIBS)
 
 gp_simulator: src/gp_simulator.c $(COMMON_SRC)
 	$(CC) $(CFLAGS) -o gp_simulator src/gp_simulator.c $(LIBS)
